@@ -1,7 +1,7 @@
 #include <avr/io.h>
 
 #define OCR1_2ms 3999
-#define OCR1_1ms 2000
+#define OCR1_1ms 1800
 
 class servo
 {
@@ -28,7 +28,7 @@ class usart
 public:
     void init(unsigned long baud = 9600)
     {
-        if (choice == 9600)
+        if (baud == 9600)
         {
             UCSR0A = 0X00;
             UCSR0B = (1 << RXEN0) | (1 << TXEN0);
@@ -54,18 +54,35 @@ public:
 };
 servo D9servo;
 usart serial;
+volatile int overflows=0;
+ISR(TIMER2_OVF_vect)
+{
+  ++overflows;
+}
+void delayinms(int time_)
+{
+  overflows = 0;
+  TCCR2B = 1 << CS21 | 1 << CS20;      //32 bit prescale gives 0.512ms per overflow
+  while (overflows * 0.512 <= time_) // wait till count of overflows equals time_
+    ;
+  TCCR2B = 0; // turn timer off after use
+}
 int main()
 {
-    D9servo.begin();
+    D9servo.begin(9);
+    TIMSK2 = 1 << TOIE2;
+    sei();
     serial.init();
     while (1)
     {
-        D9servo.write(0);
-        serial.print("0\n");
-        delay(5000);
-        D9servo.write(1);
-        serial.print("1\n");
-        delay(5000);
+        serial.print("0 start\n");
+  D9servo.write(0);
+       serial.print("0 end\n");
+           delayinms(2000);
+       serial.print("180 start\n");
+           D9servo.write(180);
+       serial.print("180 end\n");
+        delayinms(2000);
     }
     return 0;
 }
