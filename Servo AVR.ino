@@ -70,8 +70,6 @@ void delayinms(int time_)
 int main()
 {
     D9servo.begin(9);
-    TIMSK2 = 1 << TOIE2;
-    sei();
     serial.init();
     while (1)
     {
