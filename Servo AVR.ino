@@ -54,32 +54,38 @@ public:
 };
 servo D9servo;
 usart serial;
-volatile int overflows=0;
+volatile int overflows = 0;
 ISR(TIMER2_OVF_vect)
 {
-  ++overflows;
+    ++overflows;
 }
 void delayinms(int time_)
 {
-  overflows = 0;
-  TCCR2B = 1 << CS21 | 1 << CS20;      //32 bit prescale gives 0.512ms per overflow
-  while (overflows * 0.512 <= time_) // wait till count of overflows equals time_
-    ;
-  TCCR2B = 0; // turn timer off after use
+    overflows = 0;
+    TCCR2B = 1 << CS21 | 1 << CS20;    //32 bit prescale gives 0.512ms per overflow
+    while (overflows * 0.512 <= time_) // wait till count of overflows equals time_
+        ;
+    TCCR2B = 0; // turn timer off after use
+}
+void timer_init()
+{
+    TIMSK2 = 1 << TOIE2;
+    sei();
 }
 int main()
 {
     D9servo.begin(9);
     serial.init();
+    timer_init();
     while (1)
     {
         serial.print("0 start\n");
-  D9servo.write(0);
-       serial.print("0 end\n");
-           delayinms(2000);
-       serial.print("180 start\n");
-           D9servo.write(180);
-       serial.print("180 end\n");
+        D9servo.write(0);
+        serial.print("0 end\n");
+        delayinms(2000);
+        serial.print("180 start\n");
+        D9servo.write(180);
+        serial.print("180 end\n");
         delayinms(2000);
     }
     return 0;
