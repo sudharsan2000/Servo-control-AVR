@@ -1,20 +1,18 @@
 #include <avr/io.h>
 
-Class servo
+class servo
 {
-public :
-        void begin()
-        {
-            
-        }
-        void servo_write(int angle)
-        {
-            
-        }
+public:
+    void begin()
+    {
+    }
+    void servo_write(int angle)
+    {
+    }
 };
 class usart
 {
-    public:
+public:
     void usart_init(unsigned long baud)
     {
         if (choice == 9600)
